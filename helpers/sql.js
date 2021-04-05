@@ -21,4 +21,33 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+/** return SQL string and list of values for partially updating an object */
+
+function sqlForQuery(dataToQuery, fieldToSql) {
+  // get list of keys from dataToQuery
+  const keys = Object.keys(dataToQuery);
+  if (keys.length === 0) throw new BadRequestError("No data");
+  const values = [];
+
+  // create the 'WHERE' portion of the SQL query
+  // fieldToSql maps the query field to the database column name and comparison operator
+  // {nameLike: 'net', minEmployees: 20} => ['name ILIKE $1', 'num_employees >= $2']
+  const conditions = keys.map((fieldName, idx) => {
+    const colName = fieldToSql[fieldName].colname;
+    const operator = fieldToSql[fieldName].operator;
+    if (operator === "ILIKE") {
+      values.push(`%${dataToQuery[fieldName]}%`);
+    } else {
+      values.push(dataToQuery[fieldName]);
+    }
+    return `${colName} ${operator} $${idx + 1}`;
+  });
+
+  // values is the array of values for the query string
+  return {
+    whereClause: conditions.join(" AND "),
+    values,
+  };
+}
+
+module.exports = { sqlForPartialUpdate, sqlForQuery };

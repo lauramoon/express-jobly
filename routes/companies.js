@@ -14,7 +14,6 @@ const companyUpdateSchema = require("../schemas/companyUpdate.json");
 
 const router = new express.Router();
 
-
 /** POST / { company } =>  { company }
  *
  * company should be { handle, name, description, numEmployees, logoUrl }
@@ -28,7 +27,7 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyNewSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -52,8 +51,24 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    const companies = await Company.findAll();
-    return res.json({ companies });
+    const queryKeys = Object.keys(req.query);
+
+    if (queryKeys.length === 0) {
+      const companies = await Company.findAll();
+      return res.json({ companies });
+    }
+
+    const validFields = ["nameLike", "minEmployees", "maxEmployees"];
+    const allKeysValid = queryKeys.every((key) => validFields.includes(key));
+
+    if (allKeysValid) {
+      const companies = await Company.searchAll(req.query);
+      return res.json({ companies });
+    } else {
+      throw new BadRequestError(
+        "Query contains invalid field. 'nameLike', 'minEmployees', and 'maxEmployess' are valid."
+      );
+    }
   } catch (err) {
     return next(err);
   }
@@ -91,7 +106,7 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyUpdateSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -115,6 +130,5 @@ router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
     return next(err);
   }
 });
-
 
 module.exports = router;
