@@ -129,6 +129,44 @@ describe("findAll", function () {
   });
 });
 
+/************************************** apply */
+describe("apply", function () {
+  test("works", async function () {
+    let app = await User.apply("u1", 1);
+    expect(app).toEqual({
+      jobId: 1,
+    });
+  });
+
+  test("not found if no such user", async function () {
+    try {
+      await User.apply("u9", 1);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such job", async function () {
+    try {
+      await User.apply("u1", 10);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("bad request with dup app", async function () {
+    try {
+      await User.apply("u1", 1);
+      await User.apply("u1", 1);
+      fail();
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+});
+
 /************************************** get */
 
 describe("get", function () {
@@ -214,8 +252,7 @@ describe("update", function () {
 describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
-    const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+    const res = await db.query("SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 
