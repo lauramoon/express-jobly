@@ -162,16 +162,16 @@ describe("GET /companies", function () {
   test("400 for invalid search field", async function () {
     const resp = await request(app).get("/companies/?name=c");
     expect(resp.statusCode).toEqual(400);
-    expect(resp.body.error.message).toEqual(
-      "Query contains invalid field. 'nameLike', 'minEmployees', and 'maxEmployess' are valid."
+    expect(resp.body.error.message[0]).toContain(
+      `\"name\" exists in instance when not allowed`
     );
   });
 
   test("400 one valid and one invalid search field", async function () {
     const resp = await request(app).get("/companies/?minEmployees=2&name=c");
     expect(resp.statusCode).toEqual(400);
-    expect(resp.body.error.message).toEqual(
-      "Query contains invalid field. 'nameLike', 'minEmployees', and 'maxEmployess' are valid."
+    expect(resp.body.error.message[0]).toContain(
+      `\"name\" exists in instance when not allowed`
     );
   });
 

@@ -11,6 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
+const companyQuerySchema = require("../schemas/companyQuerySchema.json");
 
 const router = new express.Router();
 
@@ -58,17 +59,26 @@ router.get("/", async function (req, res, next) {
       return res.json({ companies });
     }
 
-    const validFields = ["nameLike", "minEmployees", "maxEmployees"];
-    const allKeysValid = queryKeys.every((key) => validFields.includes(key));
-
-    if (allKeysValid) {
-      const companies = await Company.searchAll(req.query);
-      return res.json({ companies });
-    } else {
-      throw new BadRequestError(
-        "Query contains invalid field. 'nameLike', 'minEmployees', and 'maxEmployess' are valid."
-      );
+    const validator = jsonschema.validate(req.query, companyQuerySchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
     }
+
+    const companies = await Company.searchAll(req.query);
+    return res.json({ companies });
+
+    // const validFields = ["nameLike", "minEmployees", "maxEmployees"];
+    // const allKeysValid = queryKeys.every((key) => validFields.includes(key));
+
+    // if (allKeysValid) {
+    //   const companies = await Company.searchAll(req.query);
+    //   return res.json({ companies });
+    // } else {
+    //   throw new BadRequestError(
+    //     "Query contains invalid field. 'nameLike', 'minEmployees', and 'maxEmployess' are valid."
+    //   );
+    // }
   } catch (err) {
     return next(err);
   }
