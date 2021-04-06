@@ -141,6 +141,34 @@ describe("get company", function () {
       description: "Desc1",
       numEmployees: 1,
       logoUrl: "http://c1.img",
+      jobs: [
+        {
+          id: 1,
+          title: "j1",
+          salary: 50000,
+          equity: "0",
+          companyHandle: "c1",
+        },
+        {
+          id: 2,
+          title: "j2",
+          salary: 60000,
+          equity: "0.01",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+
+  test("works for company with no jobs", async function () {
+    let company = await Company.get("c3");
+    expect(company).toEqual({
+      handle: "c3",
+      name: "C3",
+      description: "Desc3",
+      numEmployees: 3,
+      logoUrl: "http://c3.img",
+      jobs: [],
     });
   });
 

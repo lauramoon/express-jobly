@@ -4,7 +4,7 @@
 
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
-const { UnauthorizedError } = require("../expressError");
+const { UnauthorizedError, ForbiddenError } = require("../expressError");
 
 /** Middleware: Authenticate user.
  *
@@ -43,13 +43,19 @@ function ensureLoggedIn(req, res, next) {
 
 /** Middleware to check if user is admin
  *
- * If not, raise Unauthorized.
+ * If not logged in, raise Unauthorized.
+ *
+ * If logged in but not admin, raise Forbidden.
  */
 
 function ensureAdmin(req, res, next) {
   try {
-    if (!res.locals.user || !res.locals.user.isAdmin)
+    if (!res.locals.user) {
       throw new UnauthorizedError();
+    }
+    if (!res.locals.user.isAdmin) {
+      throw new ForbiddenError();
+    }
     return next();
   } catch (err) {
     return next(err);
@@ -59,7 +65,9 @@ function ensureAdmin(req, res, next) {
 /** Middleware to check if user is either admin
  * or the user whose data is being accessed/changed
  *
- * If not, raise Unauthorized.
+ * If not logged in, raise Unauthorized.
+ *
+ * If logged in but not qualified, raise Forbidden.
  */
 
 function ensureAdminOrSelf(req, res, next) {
@@ -72,7 +80,7 @@ function ensureAdminOrSelf(req, res, next) {
     const username = res.locals.user.username;
     const isAdmin = res.locals.user.isAdmin;
     if (!isAdmin && username != req.params.username) {
-      throw new UnauthorizedError();
+      throw new ForbiddenError();
     }
     return next();
   } catch (err) {

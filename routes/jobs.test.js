@@ -70,12 +70,12 @@ describe("POST /jobs", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("unauth for user that's not admin", async function () {
+  test("forbidden for user that's not admin", async function () {
     const resp = await request(app)
       .post("/jobs")
       .send(newJob)
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth if no logged-in user", async function () {
@@ -117,7 +117,7 @@ describe("GET /jobs", function () {
           title: "j1",
           salary: 70000,
           equity: "0",
-          companyHandle: "c3",
+          companyHandle: "c2",
         },
       ],
     });
@@ -165,7 +165,7 @@ describe("GET /jobs", function () {
           title: "j1",
           salary: 70000,
           equity: "0",
-          companyHandle: "c3",
+          companyHandle: "c2",
         },
       ],
     });
@@ -180,7 +180,7 @@ describe("GET /jobs", function () {
           title: "j1",
           salary: 70000,
           equity: "0",
-          companyHandle: "c3",
+          companyHandle: "c2",
         },
       ],
     });
@@ -231,7 +231,7 @@ describe("GET /jobs", function () {
           title: "j1",
           salary: 70000,
           equity: "0",
-          companyHandle: "c3",
+          companyHandle: "c2",
         },
       ],
     });
@@ -312,14 +312,14 @@ describe("PATCH /companies/:handle", function () {
     });
   });
 
-  test("unauth for user that's not admin", async function () {
+  test("forbidden for user that's not admin", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
         name: "C1-new",
       })
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {
@@ -370,11 +370,11 @@ describe("DELETE /jobs/:id", function () {
     expect(resp.body).toEqual({ deleted: "1" });
   });
 
-  test("unauth for user that's not admin", async function () {
+  test("forbidden for user that's not admin", async function () {
     const resp = await request(app)
       .delete(`/jobs/1`)
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {

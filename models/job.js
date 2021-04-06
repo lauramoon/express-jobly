@@ -87,7 +87,7 @@ class Job {
       finalValues = values;
     }
 
-    const companiesRes = await db.query(
+    const jobsRes = await db.query(
       `SELECT id,
               title,
               salary,
@@ -98,7 +98,7 @@ class Job {
        ORDER BY id`,
       finalValues
     );
-    return companiesRes.rows;
+    return jobsRes.rows;
   }
 
   /** Given a job id, return data about job.

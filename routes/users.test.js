@@ -74,7 +74,7 @@ describe("POST /users", function () {
     });
   });
 
-  test("unauth for non-admin", async function () {
+  test("forbidden for non-admin", async function () {
     const resp = await request(app)
       .post("/users")
       .send({
@@ -86,7 +86,7 @@ describe("POST /users", function () {
         isAdmin: true,
       })
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {
@@ -161,11 +161,11 @@ describe("GET /users", function () {
     });
   });
 
-  test("unauth for non-admin", async function () {
+  test("forbidden for non-admin", async function () {
     const resp = await request(app)
       .get("/users")
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {
@@ -218,11 +218,11 @@ describe("GET /users/:username", function () {
     });
   });
 
-  test("unauth for non-admin who is not requested user", async function () {
+  test("forbidden for non-admin who is not requested user", async function () {
     const resp = await request(app)
       .get(`/users/u1`)
       .set("authorization", `Bearer ${u3Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {
@@ -277,14 +277,14 @@ describe("PATCH /users/:username", () => {
     });
   });
 
-  test("unauth for non-admin accessing other user", async function () {
+  test("forbidden for non-admin accessing other user", async function () {
     const resp = await request(app)
       .patch(`/users/u1`)
       .send({
         firstName: "New",
       })
       .set("authorization", `Bearer ${u3Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {
@@ -372,11 +372,11 @@ describe("DELETE /users/:username", function () {
     expect(resp.body).toEqual({ deleted: "u1" });
   });
 
-  test("unauth for non-admin who's not self", async function () {
+  test("forbidden for non-admin who's not self", async function () {
     const resp = await request(app)
       .delete(`/users/u1`)
       .set("authorization", `Bearer ${u3Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {

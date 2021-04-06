@@ -99,7 +99,7 @@ describe("findAll jobs", function () {
         title: "j1",
         salary: 70000,
         equity: "0",
-        companyHandle: "c3",
+        companyHandle: "c2",
       },
     ]);
   });
@@ -124,7 +124,7 @@ describe("searchAll jobs", function () {
         title: "j1",
         salary: 70000,
         equity: "0",
-        companyHandle: "c3",
+        companyHandle: "c2",
       },
     ]);
   });
@@ -152,7 +152,7 @@ describe("searchAll jobs", function () {
         title: "j1",
         salary: 70000,
         equity: "0",
-        companyHandle: "c3",
+        companyHandle: "c2",
       },
     ]);
   });
@@ -173,7 +173,7 @@ describe("searchAll jobs", function () {
         title: "j1",
         salary: 70000,
         equity: "0",
-        companyHandle: "c3",
+        companyHandle: "c2",
       },
     ]);
   });

@@ -1,7 +1,7 @@
 "use strict";
 
 const jwt = require("jsonwebtoken");
-const { UnauthorizedError } = require("../expressError");
+const { UnauthorizedError, ForbiddenError } = require("../expressError");
 const {
   authenticateJWT,
   ensureLoggedIn,
@@ -91,12 +91,12 @@ describe("ensureAdmin", function () {
     ensureAdmin(req, res, next);
   });
 
-  test("unauth if not admin", function () {
+  test("forbidden if logged in but not admin", function () {
     expect.assertions(1);
     const req = {};
     const res = { locals: { user: { username: "test", isAdmin: false } } };
     const next = function (err) {
-      expect(err instanceof UnauthorizedError).toBeTruthy();
+      expect(err instanceof ForbiddenError).toBeTruthy();
     };
     ensureAdmin(req, res, next);
   });
@@ -133,12 +133,12 @@ describe("ensureAdminOrUser", function () {
     ensureAdminOrSelf(req, res, next);
   });
 
-  test("unauth if not admin or user", function () {
+  test("forbidden if logged in but not admin or user", function () {
     expect.assertions(1);
     const req = { params: { username: "test1" } };
     const res = { locals: { user: { username: "test", isAdmin: false } } };
     const next = function (err) {
-      expect(err instanceof UnauthorizedError).toBeTruthy();
+      expect(err instanceof ForbiddenError).toBeTruthy();
     };
     ensureAdminOrSelf(req, res, next);
   });
