@@ -293,57 +293,57 @@ describe("GET /jobs/:id", function () {
 
 /************************************** PATCH /companies/:handle */
 
-describe("PATCH /companies/:handle", function () {
+describe("PATCH /jobs/:id", function () {
   test("works for admin", async function () {
     const resp = await request(app)
-      .patch(`/companies/c1`)
+      .patch(`/jobs/1`)
       .send({
-        name: "C1-new",
+        title: "j1-new",
       })
       .set("authorization", `Bearer ${u2Token}`);
     expect(resp.body).toEqual({
-      company: {
-        handle: "c1",
-        name: "C1-new",
-        description: "Desc1",
-        numEmployees: 1,
-        logoUrl: "http://c1.img",
+      job: {
+        id: 1,
+        title: "j1-new",
+        salary: 50000,
+        equity: "0",
+        companyHandle: "c1",
       },
     });
   });
 
   test("forbidden for user that's not admin", async function () {
     const resp = await request(app)
-      .patch(`/companies/c1`)
+      .patch(`/jobs/1`)
       .send({
-        name: "C1-new",
+        title: "j1-new",
       })
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(403);
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app).patch(`/companies/c1`).send({
-      name: "C1-new",
+    const resp = await request(app).patch(`/jobs/1`).send({
+      title: "j1-new",
     });
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("not found on no such company", async function () {
+  test("not found - no such job", async function () {
     const resp = await request(app)
-      .patch(`/companies/nope`)
+      .patch(`/jobs/0`)
       .send({
-        name: "new nope",
+        title: "new",
       })
       .set("authorization", `Bearer ${u2Token}`);
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("bad request on handle change attempt", async function () {
+  test("bad request on id change attempt", async function () {
     const resp = await request(app)
-      .patch(`/companies/c1`)
+      .patch(`/jobs/1`)
       .send({
-        handle: "c1-new",
+        id: "25",
       })
       .set("authorization", `Bearer ${u2Token}`);
     expect(resp.statusCode).toEqual(400);
@@ -351,9 +351,9 @@ describe("PATCH /companies/:handle", function () {
 
   test("bad request on invalid data", async function () {
     const resp = await request(app)
-      .patch(`/companies/c1`)
+      .patch(`/jobs/1`)
       .send({
-        logoUrl: "not-a-url",
+        salary: "high",
       })
       .set("authorization", `Bearer ${u2Token}`);
     expect(resp.statusCode).toEqual(400);
