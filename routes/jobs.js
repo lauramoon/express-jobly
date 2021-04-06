@@ -6,11 +6,12 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
+const { ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
+const jobQuerySchema = require("../schemas/jobQuery.json");
 
 const router = new express.Router();
 
@@ -41,12 +42,39 @@ router.post("/", ensureAdmin, async function (req, res, next) {
 /** GET /  =>
  *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
  *
+ * Can filter on provided search filters:
+ * - title (will find case-insensitive, partial matches)
+ * - minSalary
+ * - hasEquity
+ *
  * Authorization required: none
  */
 
 router.get("/", async function (req, res, next) {
   try {
-    const jobs = await Job.findAll();
+    const queryKeys = Object.keys(req.query);
+    if (queryKeys.length === 0) {
+      const jobs = await Job.findAll();
+      return res.json({ jobs });
+    }
+
+    const validator = jsonschema.validate(req.query, jobQuerySchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    // check special condition of only 'hasEquity=false'
+    if (
+      queryKeys.length === 1 &&
+      queryKeys[0] === "hasEquity" &&
+      req.query.hasEquity === "false"
+    ) {
+      const jobs = await Job.findAll();
+      return res.json({ jobs });
+    }
+
+    const jobs = await Job.searchAll(req.query);
     return res.json({ jobs });
   } catch (err) {
     return next(err);
@@ -55,7 +83,7 @@ router.get("/", async function (req, res, next) {
 
 /** GET /[id]  =>  { job }
  *
- *  Job is { id, title, salary, equity, companyHandle }
+ * Job is { id, title, salary, equity, companyHandle }
  *
  * Authorization required: none
  */

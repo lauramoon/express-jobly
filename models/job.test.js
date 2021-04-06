@@ -105,6 +105,94 @@ describe("findAll jobs", function () {
   });
 });
 
+/************************************** searchAll */
+
+describe("searchAll jobs", function () {
+  test("works with title only", async function () {
+    const fields = { title: "1" };
+    let jobs = await Job.searchAll(fields);
+    expect(jobs).toEqual([
+      {
+        id: 1,
+        title: "j1",
+        salary: 50000,
+        equity: "0",
+        companyHandle: "c1",
+      },
+      {
+        id: 4,
+        title: "j1",
+        salary: 70000,
+        equity: "0",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+
+  test("works with hasEquity only", async function () {
+    const fields = { hasEquity: true };
+    let jobs = await Job.searchAll(fields);
+    expect(jobs).toEqual([
+      {
+        id: 2,
+        title: "j2",
+        salary: 60000,
+        equity: "0.01",
+        companyHandle: "c1",
+      },
+    ]);
+  });
+
+  test("works with minSalary only", async function () {
+    const fields = { minSalary: 65000 };
+    let jobs = await Job.searchAll(fields);
+    expect(jobs).toEqual([
+      {
+        id: 4,
+        title: "j1",
+        salary: 70000,
+        equity: "0",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+
+  test("hasEquity=false is ignored", async function () {
+    const fields = { minSalary: 55000, hasEquity: false };
+    let jobs = await Job.searchAll(fields);
+    expect(jobs).toEqual([
+      {
+        id: 2,
+        title: "j2",
+        salary: 60000,
+        equity: "0.01",
+        companyHandle: "c1",
+      },
+      {
+        id: 4,
+        title: "j1",
+        salary: 70000,
+        equity: "0",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+
+  test("works with all three fields", async function () {
+    const fields = { title: "j", minSalary: 55000, hasEquity: true };
+    let jobs = await Job.searchAll(fields);
+    expect(jobs).toEqual([
+      {
+        id: 2,
+        title: "j2",
+        salary: 60000,
+        equity: "0.01",
+        companyHandle: "c1",
+      },
+    ]);
+  });
+});
+
 /************************************** get */
 
 describe("get job", function () {

@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://our.company.com/jobUpdate.schema.json",
+    "$id": "http://our.company.com/jobQuery.schema.json",
     "type": "object",
     "properties": {
       "title": {
@@ -8,12 +8,13 @@
         "minLength": 1,
         "maxLength": 30
       },
-      "salary": {
-        "type": "integer",
-        "minimum": 0
+      "minSalary": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
       },
-      "equity": {
-        "type": "string"
+      "hasEquity": {
+        "type": "string",
+        "pattern": "[true|false]"
       }
     },
     "additionalProperties": false,

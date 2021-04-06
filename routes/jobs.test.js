@@ -131,7 +131,145 @@ describe("GET /jobs", function () {
     const resp = await request(app).get("/jobs");
     expect(resp.statusCode).toEqual(500);
   });
+
+  test("works for search - all three valid fields", async function () {
+    const resp = await request(app).get(
+      "/jobs/?title=j&minSalary=55000&hasEquity=true"
+    );
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: 2,
+          title: "j2",
+          salary: 60000,
+          equity: "0.01",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+
+  test("works for search - title only", async function () {
+    const resp = await request(app).get("/jobs/?title=1");
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: 1,
+          title: "j1",
+          salary: 50000,
+          equity: "0",
+          companyHandle: "c1",
+        },
+        {
+          id: 4,
+          title: "j1",
+          salary: 70000,
+          equity: "0",
+          companyHandle: "c3",
+        },
+      ],
+    });
+  });
+
+  test("works for search - minSalary only", async function () {
+    const resp = await request(app).get("/jobs/?minSalary=65000");
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: 4,
+          title: "j1",
+          salary: 70000,
+          equity: "0",
+          companyHandle: "c3",
+        },
+      ],
+    });
+  });
+
+  test("works for search - hasEquity=true", async function () {
+    const resp = await request(app).get("/jobs/?hasEquity=true");
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: 2,
+          title: "j2",
+          salary: 60000,
+          equity: "0.01",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+
+  test("works for search - hasEquity=false (alone)", async function () {
+    const resp = await request(app).get("/jobs/?hasEquity=false");
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: 1,
+          title: "j1",
+          salary: 50000,
+          equity: "0",
+          companyHandle: "c1",
+        },
+        {
+          id: 2,
+          title: "j2",
+          salary: 60000,
+          equity: "0.01",
+          companyHandle: "c1",
+        },
+        {
+          id: 3,
+          title: "j3",
+          salary: 40000,
+          equity: "0",
+          companyHandle: "c2",
+        },
+        {
+          id: 4,
+          title: "j1",
+          salary: 70000,
+          equity: "0",
+          companyHandle: "c3",
+        },
+      ],
+    });
+  });
+
+  test("works for search - hasEquity=false and another term", async function () {
+    const resp = await request(app).get("/jobs/?hasEquity=false&title=2");
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: 2,
+          title: "j2",
+          salary: 60000,
+          equity: "0.01",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+
+  test("400 for invalid search field", async function () {
+    const resp = await request(app).get("/jobs/?name=j");
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message[0]).toContain(
+      `\"name\" exists in instance when not allowed`
+    );
+  });
+
+  test("400 one valid and one invalid search field", async function () {
+    const resp = await request(app).get("/jobs/?minSalary=50000&name=j");
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message[0]).toContain(
+      `\"name\" exists in instance when not allowed`
+    );
+  });
 });
+
+/************************************** GET /companies/:handle */
 
 describe("GET /jobs/:id", function () {
   test("works for anon", async function () {

@@ -57,42 +57,49 @@ class Job {
     return jobsRes.rows;
   }
 
-  /** Search all companies for those meeting criteria in validated query string
+  /** Search all jobs for those meeting criteria in validated query string
    *
-   * first check that emplyee number search valid (max not less than min)
+   * first check check if hasEquity is true and handle separately from other criteria
    *
-   * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   * Returns [{ id, title, salary, equity, companyHandle }, ...]
    */
 
-  // static async searchAll(fields) {
-  //   console.log;
-  //   if (
-  //     fields.minEmployees &&
-  //     fields.maxEmployees &&
-  //     fields.maxEmployees < fields.minEmployees
-  //   ) {
-  //     throw new BadRequestError(
-  //       "'maxEmployees' cannot be less than 'minEmployees'."
-  //     );
-  //   }
-  //   const { whereClause, values } = sqlForQuery(fields, {
-  //     nameLike: { colname: "name", operator: "ILIKE" },
-  //     minEmployees: { colname: "num_employees", operator: ">=" },
-  //     maxEmployees: { colname: "num_employees", operator: "<=" },
-  //   });
-  //   const companiesRes = await db.query(
-  //     `SELECT handle,
-  //             name,
-  //             description,
-  //             num_employees AS "numEmployees",
-  //             logo_url AS "logoUrl"
-  //      FROM companies
-  //      WHERE ${whereClause}
-  //      ORDER BY name`,
-  //     values
-  //   );
-  //   return companiesRes.rows;
-  // }
+  static async searchAll(fields) {
+    let equityClause, finalWhereClause, finalValues;
+    if (fields.hasEquity) {
+      equityClause = "equity > 0";
+    }
+    delete fields.hasEquity;
+
+    if (Object.keys(fields).length === 0) {
+      finalWhereClause = equityClause;
+      finalValues = [];
+    } else {
+      const { whereClause, values } = sqlForQuery(fields, {
+        title: { colname: "title", operator: "ILIKE" },
+        minSalary: { colname: "salary", operator: ">=" },
+      });
+
+      finalWhereClause = equityClause
+        ? whereClause + " AND " + equityClause
+        : whereClause;
+
+      finalValues = values;
+    }
+
+    const companiesRes = await db.query(
+      `SELECT id,
+              title,
+              salary,
+              equity,
+              company_handle AS "companyHandle"
+       FROM jobs
+       WHERE ${finalWhereClause}
+       ORDER BY id`,
+      finalValues
+    );
+    return companiesRes.rows;
+  }
 
   /** Given a job id, return data about job.
    *

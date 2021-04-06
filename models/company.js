@@ -65,7 +65,6 @@ class Company {
    */
 
   static async searchAll(fields) {
-    console.log;
     if (
       fields.minEmployees &&
       fields.maxEmployees &&
