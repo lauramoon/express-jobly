@@ -2,7 +2,9 @@
 
 This is the Express backend for Jobly, version 2.
 
-To run this:
+To set up test and app databases, run jobly.sql.
+
+To run app:
 
     node server.js
     
