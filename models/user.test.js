@@ -128,45 +128,15 @@ describe("findAll", function () {
         isAdmin: false,
         jobs: [3, 4],
       },
+      {
+        username: "u3",
+        firstName: "U3F",
+        lastName: "U3L",
+        email: "u3@email.com",
+        isAdmin: false,
+        jobs: [null],
+      },
     ]);
-  });
-});
-
-/************************************** apply */
-describe("apply", function () {
-  test("works", async function () {
-    let app = await User.apply("u1", 1);
-    expect(app).toEqual({
-      jobId: 1,
-    });
-  });
-
-  test("not found if no such user", async function () {
-    try {
-      await User.apply("u9", 1);
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
-  test("not found if no such job", async function () {
-    try {
-      await User.apply("u1", 10);
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
-  test("bad request with dup app", async function () {
-    try {
-      await User.apply("u1", 1);
-      await User.apply("u1", 1);
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
   });
 });
 

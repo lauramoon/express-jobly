@@ -26,11 +26,13 @@ async function commonBeforeAll() {
                           last_name,
                           email)
         VALUES ('u1', $1, 'U1F', 'U1L', 'u1@email.com'),
-               ('u2', $2, 'U2F', 'U2L', 'u2@email.com')
+               ('u2', $2, 'U2F', 'U2L', 'u2@email.com'),
+               ('u3', $3, 'U3F', 'U3L', 'u3@email.com')
         RETURNING username`,
     [
       await bcrypt.hash("password1", BCRYPT_WORK_FACTOR),
       await bcrypt.hash("password2", BCRYPT_WORK_FACTOR),
+      await bcrypt.hash("password3", BCRYPT_WORK_FACTOR),
     ]
   );
 
@@ -42,8 +44,11 @@ async function commonBeforeAll() {
            ('j1', 70000, 0, 'c2')`);
 
   await db.query(`
-    INSERT INTO applications(username, job_id)
-    VALUES ('u1', 2), ('u1', 3), ('u2', 3), ('u2', 4)`);
+    INSERT INTO applications(username, job_id, status)
+    VALUES ('u1', 2, 'interested'), 
+           ('u1', 3, 'applied'), 
+           ('u2', 3, 'applied'), 
+           ('u2', 4, 'rejected')`);
 }
 
 async function commonBeforeEach() {

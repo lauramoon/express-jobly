@@ -8,6 +8,7 @@ const express = require("express");
 const { ensureAdmin, ensureAdminOrSelf } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
+const Application = require("../models/application");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
@@ -75,26 +76,6 @@ router.get("/:username", ensureAdminOrSelf, async function (req, res, next) {
   }
 });
 
-/** POST /[username]/jobs[id]
- *
- * creates job application
- *
- * Returns { applied: id }
- */
-
-router.post(
-  "/:username/jobs/:id",
-  ensureAdminOrSelf,
-  async function (req, res, next) {
-    try {
-      const app = await User.apply(req.params.username, req.params.id);
-      return res.json({ applied: app.jobId });
-    } catch (err) {
-      return next(err);
-    }
-  }
-);
-
 /** PATCH /[username] { user } => { user }
  *
  * Data can include:
@@ -133,5 +114,38 @@ router.delete("/:username", ensureAdminOrSelf, async function (req, res, next) {
     return next(err);
   }
 });
+
+/** --------------------user job application routes----------------------------- */
+
+/** POST /[username]/jobs/[id]
+ *
+ * creates job application
+ *
+ * Returns { applied: id }
+ */
+
+router.post(
+  "/:username/jobs/:id",
+  ensureAdminOrSelf,
+  async function (req, res, next) {
+    try {
+      const app = await Application.create(
+        req.params.username,
+        req.params.id,
+        req.body.status
+      );
+      return res.json({ applied: app.jobId });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** GET  /[username]/jobs
+ *
+ * get all job applications
+ */
+
+/** PATCH /[username]/jobs/[id] */
 
 module.exports = router;

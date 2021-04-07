@@ -155,32 +155,6 @@ class User {
     return user;
   }
 
-  /** Apply for job
-   *
-   * Add username and job id to applications table
-   *
-   * Returns { applied: jobId }
-   *
-   * Warning: should only be called by user or admin!
-   */
-
-  static async apply(username, jobId) {
-    try {
-      const appRes = await db.query(
-        `INSERT INTO applications (username, job_id)
-          VALUES ($1, $2)
-          RETURNING job_id AS "jobId"`,
-        [username, jobId]
-      );
-      return appRes.rows[0];
-    } catch (err) {
-      if (err.code === "23503") {
-        throw new NotFoundError();
-      }
-      throw new BadRequestError(`Duplicate application`);
-    }
-  }
-
   /** Update user data with `data`.
    *
    * This is a "partial update" --- it's fine if data doesn't contain
