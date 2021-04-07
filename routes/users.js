@@ -12,6 +12,7 @@ const Application = require("../models/application");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
+const applicationSchema = require("../schemas/application.json");
 
 const router = express.Router();
 
@@ -129,12 +130,17 @@ router.post(
   ensureAdminOrSelf,
   async function (req, res, next) {
     try {
+      const validator = jsonschema.validate(req.body, applicationSchema);
+      if (!validator.valid) {
+        const errs = validator.errors.map((e) => e.stack);
+        throw new BadRequestError(errs);
+      }
       const app = await Application.create(
         req.params.username,
         req.params.id,
         req.body.status
       );
-      return res.json({ applied: app });
+      return res.status(201).json({ applied: app });
     } catch (err) {
       return next(err);
     }
@@ -199,6 +205,11 @@ router.patch(
   ensureAdminOrSelf,
   async function (req, res, next) {
     try {
+      const validator = jsonschema.validate(req.body, applicationSchema);
+      if (!validator.valid) {
+        const errs = validator.errors.map((e) => e.stack);
+        throw new BadRequestError(errs);
+      }
       const application = await Application.update(
         req.params.username,
         req.params.id,

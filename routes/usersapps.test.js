@@ -28,6 +28,7 @@ describe("POST /users/:username/jobs/:id - new job app", () => {
       .post(`/users/u1/jobs/1`)
       .send({ status: "interested" })
       .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       applied: { status: "interested", username: "u1", jobId: 1 },
     });
@@ -38,6 +39,7 @@ describe("POST /users/:username/jobs/:id - new job app", () => {
       .post(`/users/u1/jobs/1`)
       .send({ status: "interested" })
       .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       applied: { status: "interested", username: "u1", jobId: 1 },
     });
@@ -72,6 +74,14 @@ describe("POST /users/:username/jobs/:id - new job app", () => {
       .send({ status: "interested" })
       .set("authorization", `Bearer ${u2Token}`);
     expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request if status invalid", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/1`)
+      .send({ status: "maybe" })
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(400);
   });
 });
 
@@ -295,6 +305,14 @@ describe("PATCH /users/:username/jobs/:id - update app status", function () {
       .send({ status: "accepted" })
       .set("authorization", `Bearer ${u2Token}`);
     expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request if status invalid", async function () {
+    const resp = await request(app)
+      .patch(`/users/u1/jobs/2`)
+      .send({ status: "maybe" })
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(400);
   });
 });
 

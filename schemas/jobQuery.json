@@ -14,7 +14,7 @@
       },
       "hasEquity": {
         "type": "string",
-        "pattern": "[true|false]"
+        "enum": ["true", "false"]
       }
     },
     "additionalProperties": false,
