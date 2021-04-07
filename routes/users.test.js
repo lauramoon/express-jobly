@@ -142,6 +142,7 @@ describe("GET /users", function () {
           lastName: "U1L",
           email: "user1@user.com",
           isAdmin: false,
+          jobs: [2, 3],
         },
         {
           username: "u2",
@@ -149,6 +150,7 @@ describe("GET /users", function () {
           lastName: "U2L",
           email: "user2@user.com",
           isAdmin: true,
+          jobs: [3, 4],
         },
         {
           username: "u3",
@@ -156,6 +158,7 @@ describe("GET /users", function () {
           lastName: "U3L",
           email: "user3@user.com",
           isAdmin: false,
+          jobs: [null],
         },
       ],
     });
@@ -199,6 +202,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [2, 3],
       },
     });
   });
@@ -214,6 +218,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [2, 3],
       },
     });
   });
@@ -299,6 +304,7 @@ describe("PATCH /users/:username", () => {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [2, 3],
       },
     });
   });
@@ -317,6 +323,7 @@ describe("PATCH /users/:username", () => {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [2, 3],
       },
     });
   });
@@ -372,6 +379,7 @@ describe("PATCH /users/:username", () => {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [2, 3],
       },
     });
     const isSuccessful = await User.authenticate("u1", "new-password");
@@ -392,6 +400,7 @@ describe("PATCH /users/:username", () => {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [2, 3],
       },
     });
     const isSuccessful = await User.authenticate("u1", "new-password");

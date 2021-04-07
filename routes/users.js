@@ -5,11 +5,7 @@
 const jsonschema = require("jsonschema");
 
 const express = require("express");
-const {
-  ensureLoggedIn,
-  ensureAdmin,
-  ensureAdminOrSelf,
-} = require("../middleware/auth");
+const { ensureAdmin, ensureAdminOrSelf } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
@@ -46,7 +42,8 @@ router.post("/", ensureAdmin, async function (req, res, next) {
   }
 });
 
-/** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
+/** GET / =>
+ * { users: [ {username, firstName, lastName, email, jobs: [jobId, ...] }, ... ] }
  *
  * Returns list of all users.
  *
@@ -64,7 +61,7 @@ router.get("/", ensureAdmin, async function (req, res, next) {
 
 /** GET /[username] => { user }
  *
- * Returns { username, firstName, lastName, isAdmin }
+ * Returns { username, firstName, lastName, isAdmin, jobs: [jobId, jobId, ...] }
  *
  * Authorization required: login
  **/
@@ -103,7 +100,7 @@ router.post(
  * Data can include:
  *   { firstName, lastName, password, email }
  *
- * Returns { username, firstName, lastName, email, isAdmin }
+ * Returns { username, firstName, lastName, email, isAdmin, jobs: [jobId, ...] }
  *
  * Authorization required: login
  **/

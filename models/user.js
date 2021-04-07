@@ -25,14 +25,17 @@ class User {
   static async authenticate(username, password) {
     // try to find the user first
     const result = await db.query(
-      `SELECT username,
+      `SELECT u.username AS "username",
                   password,
                   first_name AS "firstName",
                   last_name AS "lastName",
                   email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
+                  is_admin AS "isAdmin",
+                  json_agg(job_id) AS "jobs"
+        FROM users AS u 
+          JOIN applications AS a ON (u.username = a.username)
+        WHERE u.username = $1
+        GROUP BY u.username`,
       [username]
     );
 
@@ -87,7 +90,11 @@ class User {
             email,
             is_admin)
            VALUES ($1, $2, $3, $4, $5, $6)
-           RETURNING username, first_name AS "firstName", last_name AS "lastName", email, is_admin AS "isAdmin"`,
+           RETURNING username, 
+            first_name AS "firstName", 
+            last_name AS "lastName", 
+            email, 
+            is_admin AS "isAdmin"`,
       [username, hashedPassword, firstName, lastName, email, isAdmin]
     );
 
@@ -98,18 +105,21 @@ class User {
 
   /** Find all users.
    *
-   * Returns [{ username, first_name, last_name, email, is_admin }, ...]
+   * Returns [{ username, first_name, last_name, email, is_admin, jobs: [jobId, ... ] }, ...]
    **/
 
   static async findAll() {
     const result = await db.query(
-      `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           ORDER BY username`
+      `SELECT u.username AS "username",
+              first_name AS "firstName",
+              last_name AS "lastName",
+              email,
+              is_admin AS "isAdmin",
+              json_agg(job_id) AS jobs
+        FROM users AS u 
+          LEFT JOIN applications AS a ON (u.username = a.username)
+        GROUP BY u.username
+        ORDER BY u.username`
     );
 
     return result.rows;
@@ -125,13 +135,16 @@ class User {
 
   static async get(username) {
     const userRes = await db.query(
-      `SELECT username,
+      `SELECT u.username AS "username",
                   first_name AS "firstName",
                   last_name AS "lastName",
                   email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
+                  is_admin AS "isAdmin",
+                  json_agg(job_id) AS jobs
+          FROM users AS u 
+            JOIN applications AS a ON (u.username = a.username)
+          WHERE u.username = $1
+          GROUP BY u.username`,
       [username]
     );
 
@@ -176,7 +189,7 @@ class User {
    * Data can include:
    *   { firstName, lastName, password, email, isAdmin }
    *
-   * Returns { username, firstName, lastName, email, isAdmin }
+   * Returns { username, firstName, lastName, email, isAdmin, jobs: [jobId, ...] }
    *
    * Throws NotFoundError if not found.
    *
@@ -200,17 +213,12 @@ class User {
     const querySql = `UPDATE users 
                       SET ${setCols} 
                       WHERE username = ${usernameVarIdx} 
-                      RETURNING username,
-                                first_name AS "firstName",
-                                last_name AS "lastName",
-                                email,
-                                is_admin AS "isAdmin"`;
+                      RETURNING username`;
     const result = await db.query(querySql, [...values, username]);
-    const user = result.rows[0];
 
-    if (!user) throw new NotFoundError(`No user: ${username}`);
+    if (!result.rows[0]) throw new NotFoundError(`No user: ${username}`);
 
-    delete user.password;
+    const user = User.get(username);
     return user;
   }
 
