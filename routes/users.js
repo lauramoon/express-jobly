@@ -24,7 +24,7 @@ const router = express.Router();
  * This returns the newly created user and an authentication token for them:
  *  {user: { username, firstName, lastName, email, isAdmin }, token }
  *
- * Authorization required: login
+ * Authorization required: admin
  **/
 
 router.post("/", ensureAdmin, async function (req, res, next) {
@@ -48,7 +48,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  *
  * Returns list of all users.
  *
- * Authorization required: login
+ * Authorization required: admin
  **/
 
 router.get("/", ensureAdmin, async function (req, res, next) {
@@ -64,7 +64,7 @@ router.get("/", ensureAdmin, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, isAdmin, jobs: [jobId, jobId, ...] }
  *
- * Authorization required: login
+ * Authorization required: admin or user being accessed
  **/
 
 router.get("/:username", ensureAdminOrSelf, async function (req, res, next) {
@@ -83,7 +83,7 @@ router.get("/:username", ensureAdminOrSelf, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, email, isAdmin, jobs: [jobId, ...] }
  *
- * Authorization required: login
+ * Authorization required: admin or user being updated
  **/
 
 router.patch("/:username", ensureAdminOrSelf, async function (req, res, next) {
@@ -103,7 +103,7 @@ router.patch("/:username", ensureAdminOrSelf, async function (req, res, next) {
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: login
+ * Authorization required: admin or user being deleted
  **/
 
 router.delete("/:username", ensureAdminOrSelf, async function (req, res, next) {
@@ -117,11 +117,11 @@ router.delete("/:username", ensureAdminOrSelf, async function (req, res, next) {
 
 /** --------------------user job application routes----------------------------- */
 
-/** POST /[username]/jobs/[id]
+/** POST /[username]/jobs/[id] => { applied: id }
  *
  * creates job application
  *
- * Returns { applied: id }
+ * Authorization required: admin or user applying
  */
 
 router.post(
@@ -134,18 +134,103 @@ router.post(
         req.params.id,
         req.body.status
       );
-      return res.json({ applied: app.jobId });
+      return res.json({ applied: app });
     } catch (err) {
       return next(err);
     }
   }
 );
 
-/** GET  /[username]/jobs
+/** GET  /[username]/jobs =>
+ * { applications: [ {status, jobId, title, salary, equity, companyHandle}, ...] }
  *
- * get all job applications
+ * get all job applications for user
+ *
+ * Authorization required: admin or applicant
  */
 
-/** PATCH /[username]/jobs/[id] */
+router.get(
+  "/:username/jobs",
+  ensureAdminOrSelf,
+  async function (req, res, next) {
+    try {
+      const applications = await Application.getByUser(req.params.username);
+      return res.json({ applications });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** GET /[username]/job/[id] =>
+ * { application: { status, job: { jobId, title, salary, equity, companyHandle },
+ *          user: { username, firstName, lastName, email }}}
+ *
+ * get all details related to job application
+ *
+ * Authorization required: admin or applicant
+ */
+
+router.get(
+  "/:username/jobs/:id",
+  ensureAdminOrSelf,
+  async function (req, res, next) {
+    try {
+      const application = await Application.get(
+        req.params.username,
+        req.params.id
+      );
+      return res.json({ application });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** PATCH /[username]/jobs/[id] => application: { username, jobId, status}
+ *
+ * update status of application
+ *
+ * Authorization required: admin or applicant
+ */
+
+router.patch(
+  "/:username/jobs/:id",
+  ensureAdminOrSelf,
+  async function (req, res, next) {
+    try {
+      const application = await Application.update(
+        req.params.username,
+        req.params.id,
+        req.body.status
+      );
+      return res.json({ application });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** DELETE /[username]/jobs/[id] => { deleted: application by username to id }
+ *
+ * delete application
+ *
+ * Authorization required: admin or applicant
+ */
+
+router.delete(
+  "/:username/jobs/:id",
+  ensureAdminOrSelf,
+  async function (req, res, next) {
+    try {
+      await Application.remove(req.params.username, req.params.id);
+      return res.json({
+        deleted: `application by ${req.params.username} to ${req.params.id}`,
+      });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 module.exports = router;
