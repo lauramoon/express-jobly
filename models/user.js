@@ -128,7 +128,7 @@ class User {
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   *   where jobs is [jobid, jobid ...]
    *
    * Throws NotFoundError if user not found.
    **/
@@ -139,12 +139,9 @@ class User {
                   first_name AS "firstName",
                   last_name AS "lastName",
                   email,
-                  is_admin AS "isAdmin",
-                  json_agg(job_id) AS jobs
+                  is_admin AS "isAdmin"
           FROM users AS u 
-            JOIN applications AS a ON (u.username = a.username)
-          WHERE u.username = $1
-          GROUP BY u.username`,
+          WHERE u.username = $1`,
       [username]
     );
 
@@ -152,6 +149,12 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
+    const userJobsRes = await db.query(
+      `SELECT a.job_id
+       FROM applications AS a
+       WHERE a.username = $1`, [username]);
+
+    user.jobs = userJobsRes.rows.map(a => a.job_id);
     return user;
   }
 

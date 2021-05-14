@@ -226,7 +226,7 @@ class Application {
       `DELETE FROM applications
         WHERE username = $1
           AND job_id = $2
-        RETURNING username`,
+        RETURNING username, job_id AS "jobId"`,
       [username, jobId]
     );
     const app = appRes.rows[0];
@@ -234,6 +234,8 @@ class Application {
       throw new NotFoundError(
         `No application for job ${jobId} and user ${username}`
       );
+    
+    return app;  
   }
 }
 

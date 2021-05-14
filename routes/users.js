@@ -234,9 +234,9 @@ router.delete(
   ensureAdminOrSelf,
   async function (req, res, next) {
     try {
-      await Application.remove(req.params.username, req.params.id);
+      const application = await Application.remove(req.params.username, req.params.id);
       return res.json({
-        deleted: `application by ${req.params.username} to ${req.params.id}`,
+        deleted: application,
       });
     } catch (err) {
       return next(err);
