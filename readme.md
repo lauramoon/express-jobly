@@ -2,7 +2,7 @@
 
 This is the Express back-end for Jobly, the mock jobs website. It is currently deployed here: https://moon-jobly.herokuapp.com/.
 
-The code for the React front-end is here: https://github.com/lauramoon/react-jobly, where you can create an account or use the demo account:
+The code for the React front-end is here: https://github.com/lauramoon/react-jobly. It is deployed here: https://moon-jobly.surge.sh/, where you can create an account or use the demo account:
 
 - username: test-user
 - password: test-user
