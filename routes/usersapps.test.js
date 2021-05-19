@@ -323,14 +323,14 @@ describe("DELETE /users/:username/id/:id - delete app", function () {
     const resp = await request(app)
       .delete(`/users/u1/jobs/2`)
       .set("authorization", `Bearer ${u2Token}`);
-    expect(resp.body).toEqual({ deleted: "application by u1 to 2" });
+    expect(resp.body).toEqual({ deleted: { jobId: 2, username: "u1" } });
   });
 
   test("works for applicant", async function () {
     const resp = await request(app)
       .delete(`/users/u1/jobs/2`)
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.body).toEqual({ deleted: "application by u1 to 2" });
+    expect(resp.body).toEqual({ deleted: { jobId: 2, username: "u1" } });
   });
 
   test("forbidden for non-admin, non-applicant", async function () {

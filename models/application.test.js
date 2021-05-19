@@ -246,7 +246,7 @@ describe("update app status", function () {
 describe("remove app", function () {
   test("works", async function () {
     const app = await Application.remove("u1", 3);
-    expect(app).toEqual(undefined);
+    expect(app).toEqual({ jobId: 3, username: "u1" });
     const res = await db.query(
       "SELECT * FROM applications WHERE username='u1' AND job_id=3"
     );
